@@ -3,6 +3,8 @@ pandas==0.18.1
 diffbot==2.0.0
 anyconfig==0.6.0
 tqdm==4.7.4
+requests==2.10.0
+
 
 # dist
 PyInstaller==3.2
