@@ -2,7 +2,7 @@
 
 set -e
 
-version="v3"
+version="v4"
 
 . venv/bin/activate
 pyinstaller -F -y bing-api.spec
@@ -15,4 +15,4 @@ rm -f dist/*.csv
 rm -f dist/.DS_Store
 
 zip -r bing-diffbot-${version}.zip dist
-git archive master -o bing-diffbot-${version}-src.zip
+git archive master -o bing-diffbot-src-${version}.zip

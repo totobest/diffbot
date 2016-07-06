@@ -32,7 +32,6 @@ CSV_COLUMN_LIST = [
     "mpn",
     "isbn",
     "specs",
-    "images",
     "url",
     "title",
     "height",
@@ -79,6 +78,11 @@ CSV_COLUMN_LIST = [
     "quantityPrices.minQuantity",
     "quantityPrices.price",
     "size",
+    "imageUrl1",
+    "imageUrl2",
+    "imageUrl3",
+    "imageUrl4",
+    "imageUrl5",
 ]
 
 

@@ -23,19 +23,6 @@ diffbot_client = diffbot.Client(token=settings['diffbot']['token'])
 log = logging.getLogger(__name__)
 
 
-def diffbot_product(url):
-    return diffbot_client.product(
-        url,
-        fields=[
-            "links",
-            "meta",
-            "querystring",
-            "breadcrumb"
-        ],
-        discussion=False
-    )
-
-
 def diffbot_bulk_create(url_list):
     bulk_job_id = "{}".format(uuid.uuid4()).replace('-', '')[:30]
 
@@ -98,79 +85,16 @@ def flatten_dict(d, parent_key='', sep='.'):
 
 def diffbot2csv(diffbot_object):
 
-    base = {
-        'type': diffbot_object.get('type'),
-        'pageUrl': diffbot_object.get('pageUrl'),
-        'resolvedPageUrl': diffbot_object.get('resolvedPageUrl'),
-        'title': diffbot_object.get('title'),
-        'text': diffbot_object.get('text'),
-        'brand': diffbot_object.get('brand'),
-        'offerPrice': diffbot_object.get('offerPrice'),
-        'regularPrice': diffbot_object.get('regularPrice'),
-        'shippingAmount': diffbot_object.get('shippingAmount'),
-        'saveAmount': diffbot_object.get('saveAmount'),
-        'offerPriceDetails': diffbot_object.get('offerPriceDetails'),
-        'regularPriceDetails': diffbot_object.get('regularPriceDetails'),
-        'saveAmountDetails': diffbot_object.get('saveAmountDetails'),
-        'productId': diffbot_object.get('productId'),
-        'upc': diffbot_object.get('upc'),
-        'sku': diffbot_object.get('sku'),
-        'mpn': diffbot_object.get('mpn'),
-        'isbn': diffbot_object.get('isbn'),
-        'specs': diffbot_object.get('specs'),
-        'discussion': diffbot_object.get('discussion'),
-        'prefixCode': diffbot_object.get('prefixCode'),
-        'productOrigin': diffbot_object.get('productOrigin'),
-        'humanLanguage': diffbot_object.get('humanLanguage'),
-        'diffbotUri': diffbot_object.get('diffbotUri'),
-        # Optional fields, available using fields=
-        'links': diffbot_object.get('links'),
-        'meta': flatten_dict(diffbot_object.get('meta')),
-        'querystring': diffbot_object.get('querystring'),
-        # 'breadcrumb': diffbot_object.get('breadcrumb'),
-        # The following fields are in an early beta stage:
-        'availability': diffbot_object.get('availability'),
-        'colors': diffbot_object.get('colors'),
-        'normalizedSpecs': diffbot_object.get('normalizedSpecs'),
-        'multipleProducts': diffbot_object.get('multipleProducts'),
-        'priceRange.minPrice': diffbot_object.get('priceRange.minPrice'),
-        'priceRange.maxPrice': diffbot_object.get('priceRange.maxPrice'),
-        'quantityPrices.minQuantity': diffbot_object.get('quantityPrices.minQuantity'),
-        'quantityPrices.price': diffbot_object.get('quantityPrices.price'),
-        'minQuantity': diffbot_object.get('minQuantity'),
-        'price': diffbot_object.get('price'),
-        'size': diffbot_object.get('size'),
-    }
-
-    if diffbot_object.get('images') is not None:
-        image_list = map(lambda image_obj: {
-            'url': image_obj.get('url'),
-            'title': image_obj.get('title'),
-            'height': image_obj.get('height'),
-            'width': image_obj.get('width'),
-            'naturalHeight': image_obj.get('naturalHeight'),
-            'naturalWidth': image_obj.get('naturalWidth'),
-            'primary': image_obj.get('primary'),
-            'xpath': image_obj.get('xpath'),
-            'diffbotUri': image_obj.get('diffbotUri'),
-        }, diffbot_object.get('images'))
-
     base = flatten_dict(diffbot_object)
+
+    images = diffbot_object.get('images')
+    if images is not None:
+        image_kv_list = [("imageUrl{}".format(index + 1), image_obj.get('url')) for index, image_obj in enumerate(images)]
+
+        base.update(dict(image_kv_list))
+
     return base
 
-
-def process_bing_output(row_index, row):
-
-    url = row.loc[diffbot_input_csvdef.C_URL]
-    log.info("Processing row={} url={}".format(row_index, url))
-    diffbot_json = diffbot_product(url)
-    try:
-        diffbot_object = diffbot_json['objects'][0]
-    except KeyError:
-        log.warn("URL {} yields to not result from Diffbot".format(url))
-        return None
-    diffbot_dict = diffbot2csv(diffbot_object)
-    return diffbot_dict
 
 import argparse
 
@@ -216,7 +140,7 @@ def main():
 
     pbar.set_description("Getting result data.")
     diffbot_result_list = diffbot_bulk_get_data(bulk_job_id)
-    diffbot_flatten_result_list = list(map(flatten_dict, filter(partial(is_not, None), diffbot_result_list)))
+    diffbot_flatten_result_list = list(map(diffbot2csv, filter(partial(is_not, None), diffbot_result_list)))
     pbar.set_description("Writing output file.")
     save_diffbot_output_data(diffbot_flatten_result_list, output_filename)
 
