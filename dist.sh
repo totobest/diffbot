@@ -2,7 +2,7 @@
 
 set -e
 
-version="v4"
+version="v5"
 
 . venv/bin/activate
 pyinstaller -F -y bing-api.spec

@@ -4,7 +4,7 @@ diffbot==2.0.0
 anyconfig==0.6.0
 tqdm==4.7.4
 requests==2.10.0
-
+python-dateutil
 
 # dist
 PyInstaller==3.2
