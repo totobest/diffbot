@@ -41,12 +41,57 @@ token = my-diffbot-token
 
 ### Diffbot API
 
+#### Start a new job
+
 ```shell
 ./diffbot_api -i diffbot-input.csv -o diffbot-output.csv
 ```
 > OUTPUT
 ```
  37%|███████████████████████████████████████▌                                                                   | 37/100 [05:14<06:58,  6.64s/it]
+```
+
+#### Resume a job
+
+```shell
+./diffbot_api -r 610a4b673c2747c7aa6377636018b7 -o diffbot-output.csv
+```
+> OUTPUT
+```
+Resuming bulk job with ID 610a4b673c2747c7aa6377636018b7.
+ 37%|███████████████████████████████████████▌                                                                   | 37/100 [05:14<06:58,  6.64s/it]
+```
+
+
+#### Download data from a job
+
+```shell
+./diffbot_api -d 67aa6e059b2b4f53a04287d221b92e -o diffbot-output.csv
+```
+> OUTPUT
+```
+Downloading data from bulk job with ID 67aa6e059b2b4f53a04287d221b92e.
+Getting result data...
+Result data downloaded.
+Writing output file...
+File written.
+```
+
+#### Get the status of a job
+```shell
+./diffbot_api -s 67aa6e059b2b4f53a04287d221b92e
+```
+> OUTPUT
+```
+Getting status of job with ID 83f3c757915545c09e845573e30690.
+
+        ID: 83f3c757915545c09e845573e30690
+        Current Status: Job has completed and no repeat is scheduled.
+        Job Started: 2016-08-20 02:16:58
+        Job Completed: 2016-08-20 02:17:36
+        Pages Attempted: 6
+        Pages Processed: 6
+        Email Notification: 
 ```
 
 
