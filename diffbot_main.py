@@ -1,27 +1,24 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
+import argparse
 import datetime
-
-import collections
 import logging
-import os
 import urllib
 import uuid
-from functools import partial
-from operator import is_not
 from time import sleep
 
-import sys
-
+import collections
 import diffbot
-from csvdef.diffbot_input_csvdef import read_diffbot_input_data
-from settings import settings
-from csvdef import diffbot_input_csvdef
-from csvdef.diffbot_output_csvdef import save_diffbot_output_data
-from tqdm import tqdm
+import os
 import requests
-
+from csvdef import diffbot_input_csvdef
+from csvdef.diffbot_input_csvdef import read_diffbot_input_data
+from csvdef.diffbot_output_csvdef import save_diffbot_output_data
+from functools import partial
+from operator import is_not
+from settings import settings
+from tqdm import tqdm
 
 diffbot_client = diffbot.Client(token=settings['diffbot']['token'])
 
@@ -99,14 +96,12 @@ def diffbot2csv(diffbot_object):
 
     images = diffbot_object.get('images')
     if images is not None:
-        image_kv_list = [("imageUrl{}".format(index + 1), image_obj.get('url')) for index, image_obj in enumerate(images)]
+        image_kv_list = \
+            [("imageUrl{}".format(index + 1), image_obj.get('url')) for index, image_obj in enumerate(images)]
 
         base.update(dict(image_kv_list))
 
     return base
-
-
-import argparse
 
 parser = argparse.ArgumentParser(description='Diffbot API to CSV')
 
@@ -120,13 +115,12 @@ input_arg_group.add_argument(
     help="Resume a job."
 )
 input_arg_group.add_argument(
-    '-d', '--download', metavar="JOB_ID",
-    help="Download the data related to a job."
-)
-input_arg_group.add_argument(
     '-s', '--status', metavar="JOB_ID",
     help="Get the status of a job."
 )
+
+parser.add_argument('-f', '--force', action='store_true',
+                    help="Force downloading the results even if the job is not completed.")
 
 parser.add_argument('-o', '--output',
                     help="CSV file to write results to.")
@@ -142,20 +136,11 @@ def main():
     args = parser.parse_args()
     input_filename = args.input
     resume = args.resume
-    download = args.download
-
     status = args.status
-
+    force = args.force
     output_filename = args.output
 
-    def output_filename_required():
-        if output_filename is None:
-            print("error: the following arguments are required: -o/--output", file=sys.stderr)
-            exit(2)
-
-    total_items = None
     if input_filename is not None:
-        output_filename_required()
         bing_output_data = read_diffbot_input_data(input_filename)
         log.info("Read {} URLs.".format(len(bing_output_data)))
 
@@ -164,15 +149,10 @@ def main():
         print("Starting bulk job with ID {}.".format(bulk_job_id))
         total_items = len(url_list)
     elif resume is not None:
-        output_filename_required()
         bulk_job_id = resume
         print("Resuming bulk job with ID {}.".format(bulk_job_id))
         ret = diffbot_bulk_get_details(bulk_job_id)
         total_items = ret['objectsFound']
-    elif download is not None:
-        output_filename_required()
-        bulk_job_id = download
-        print("Downloading data from bulk job with ID {}.".format(bulk_job_id))
     elif status is not None:
         bulk_job_id = status
         print("Getting status of job with ID {}.".format(bulk_job_id))
@@ -194,8 +174,12 @@ def main():
             **ret
         ))
         return
+    else:
+        raise RuntimeError()
 
-    if download is None:
+    if force:
+        print("Force flag set, do not wait for job's completion.")
+    else:
         pbar = tqdm(total=total_items)
         done = 0
         while True:
@@ -215,13 +199,14 @@ def main():
         # end while
         pbar.close()
 
-    print("Getting result data...")
-    diffbot_result_list = diffbot_bulk_get_data(bulk_job_id)
-    print("Result data downloaded.")
-    diffbot_flatten_result_list = list(map(diffbot2csv, filter(partial(is_not, None), diffbot_result_list)))
-    print("Writing output file...")
-    save_diffbot_output_data(diffbot_flatten_result_list, output_filename)
-    print("File written.")
+    if output_filename is not None:
+        print("Downloading result data...")
+        diffbot_result_list = diffbot_bulk_get_data(bulk_job_id)
+        print("Converting data to CSV...")
+        diffbot_flatten_result_list = list(map(diffbot2csv, filter(partial(is_not, None), diffbot_result_list)))
+        print("Writing output file to {}...".format(output_filename))
+        save_diffbot_output_data(diffbot_flatten_result_list, output_filename)
+        print("Done!")
 
 
 if __name__ == "__main__":

@@ -6,35 +6,16 @@ Unzip the ZIP file.
 
 ## Configuration
 
-Edit the file `settings.ini`. It should contains the following information:
-```ini
-
-[bing]
-api_key = my-bing-api-key
-results_limit = 50
-market = en-US
-# latitude = 47.603450
-# longitude = -122.329696
-
-[diffbot]
-token = my-diffbot-token
-
-```
+Edit the file `settings.ini`.
 
 ## How to use
 
-### Usage
-
-```
-
-
-```
 ### Bing API
 
 ```shell
 ./bing_api -i bing-input.csv -o bing-output.csv
 ```
-> OUTPUT
+
 ```
  37%|███████████████████████████████████████▌                                                                   | 37/100 [05:14<06:58,  1.64s/it]
 ```
@@ -46,7 +27,7 @@ token = my-diffbot-token
 ```shell
 ./diffbot_api -i diffbot-input.csv -o diffbot-output.csv
 ```
-> OUTPUT
+
 ```
  37%|███████████████████████████████████████▌                                                                   | 37/100 [05:14<06:58,  6.64s/it]
 ```
@@ -56,21 +37,23 @@ token = my-diffbot-token
 ```shell
 ./diffbot_api -r 610a4b673c2747c7aa6377636018b7 -o diffbot-output.csv
 ```
-> OUTPUT
+
 ```
 Resuming bulk job with ID 610a4b673c2747c7aa6377636018b7.
  37%|███████████████████████████████████████▌                                                                   | 37/100 [05:14<06:58,  6.64s/it]
 ```
 
 
-#### Download data from a job
+#### Download data regardless of the status of the job.
+
 
 ```shell
-./diffbot_api -d 67aa6e059b2b4f53a04287d221b92e -o diffbot-output.csv
+./diffbot_api -r 67aa6e059b2b4f53a04287d221b92e -f -o diffbot-output.csv
 ```
-> OUTPUT
+
 ```
-Downloading data from bulk job with ID 67aa6e059b2b4f53a04287d221b92e.
+Resuming bulk job with ID 610a4b673c2747c7aa6377636018b7.
+Downloading data from bulk job
 Getting result data...
 Result data downloaded.
 Writing output file...
@@ -81,7 +64,7 @@ File written.
 ```shell
 ./diffbot_api -s 67aa6e059b2b4f53a04287d221b92e
 ```
-> OUTPUT
+
 ```
 Getting status of job with ID 83f3c757915545c09e845573e30690.
 
