@@ -29,6 +29,7 @@ Edit the file `settings.ini`.
 ```
 
 ```
+Starting bulk job with ID dc1a6178d9b540a59124d54f6d57d5.
  37%|███████████████████████████████████████▌                                                                   | 37/100 [05:14<06:58,  6.64s/it]
 ```
 
@@ -52,12 +53,12 @@ Resuming bulk job with ID 610a4b673c2747c7aa6377636018b7.
 ```
 
 ```
-Resuming bulk job with ID 610a4b673c2747c7aa6377636018b7.
-Downloading data from bulk job
-Getting result data...
-Result data downloaded.
-Writing output file...
-File written.
+Resuming bulk job with ID 83f3c757915545c09e845573e30690.
+Force flag set, do not wait for job's completion.
+Downloading result data...
+Converting data to CSV...
+Writing output file to output.csv...
+Done!
 ```
 
 #### Get the status of a job
